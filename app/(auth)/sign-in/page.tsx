@@ -22,11 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-const signInSchema = z.object({
-  email: z.string().min(2).max(50),
-  password: z.string().min(2).max(50),
-});
+import { signInSchema } from "@/lib/auth-schema";
 
 export default function SignInPage() {
   const form = useForm<z.infer<typeof signInSchema>>({
@@ -58,11 +54,7 @@ export default function SignInPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="johndoe@gmail.com"
-                      type="email"
-                      {...field}
-                    />
+                    <Input placeholder="johndoe@gmail.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,7 +77,9 @@ export default function SignInPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit" className="w-full">
+              Submit
+            </Button>
           </form>
         </Form>
       </CardContent>
