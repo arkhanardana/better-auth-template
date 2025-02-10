@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const signInSchema = z.object({
-  name: z.string().min(2).max(50),
   email: z.string().min(2).max(50),
   password: z.string().min(2).max(50),
 });
@@ -33,7 +32,6 @@ export default function SignInPage() {
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
     },
