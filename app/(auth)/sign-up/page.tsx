@@ -23,8 +23,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formSchema } from "@/lib/auth-schema";
+import { authClient } from "@/lib/auth-client";
+import { useToast } from "@/app/hooks/use-toast";
 
 export default function SignUpPage() {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,7 +37,34 @@ export default function SignUpPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { name, email, password } = values;
+    const { data, error } = await authClient.signUp.email(
+      {
+        email,
+        password,
+        name,
+        callbackURL: "/sign-in",
+      },
+      {
+        onRequest: () => {
+          toast({
+            title: "Please wait...",
+          });
+        },
+        onSuccess: () => {
+          form.reset();
+        },
+        onError: (ctx) => {
+          toast({ title: ctx.error.message, variant: "destructive" });
+          form.setError("email", {
+            type: "manual",
+            message: ctx.error.message,
+          });
+        },
+      }
+    );
+
     console.log(values);
   }
   return (
