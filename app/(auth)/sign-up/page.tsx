@@ -25,11 +25,16 @@ import Link from "next/link";
 import { formSchema } from "@/lib/auth-schema";
 import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/app/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
+  const { push } = useRouter();
   const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onBlur",
+    shouldFocusError: false,
     defaultValues: {
       name: "",
       email: "",
@@ -41,10 +46,9 @@ export default function SignUpPage() {
     const { name, email, password } = values;
     const { data, error } = await authClient.signUp.email(
       {
+        name,
         email,
         password,
-        name,
-        callbackURL: "/sign-in",
       },
       {
         onRequest: () => {
@@ -54,18 +58,35 @@ export default function SignUpPage() {
         },
         onSuccess: () => {
           form.reset();
+          toast({
+            title: "Sign up success",
+          });
+          push("/sign-in");
         },
-        onError: (ctx) => {
-          toast({ title: ctx.error.message, variant: "destructive" });
+        onError: ({ error }) => {
+          let errorMessage = error.message;
+
+          if (
+            errorMessage.includes("already exists") ||
+            errorMessage.includes("duplicate")
+          ) {
+            errorMessage =
+              "This email is already registered. Please use another email.";
+          }
+
+          toast({
+            title: "Sign up failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+
           form.setError("email", {
             type: "manual",
-            message: ctx.error.message,
+            message: errorMessage,
           });
         },
       }
     );
-
-    console.log(values);
   }
   return (
     <Card className="w-full max-w-md mx-auto">
