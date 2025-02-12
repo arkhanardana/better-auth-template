@@ -23,8 +23,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { signInSchema } from "@/lib/auth-schema";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "@/app/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignInPage() {
+  const { push } = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -33,8 +39,36 @@ export default function SignInPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof signInSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof signInSchema>) {
+    const { email, password } = values;
+    const { data, error } = await authClient.signIn.email(
+      {
+        email,
+        password,
+      },
+      {
+        onRequest: () => {
+          toast({
+            title: "Please wait...",
+          });
+          setIsSubmitting(true);
+        },
+        onSuccess: () => {
+          form.reset();
+          toast({
+            title: "Sign in success",
+          });
+          push("/dashboard");
+        },
+        onError: () => {
+          toast({
+            title: "Invalid Email or Password",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+        },
+      }
+    );
   }
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -77,7 +111,7 @@ export default function SignInPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               Submit
             </Button>
           </form>

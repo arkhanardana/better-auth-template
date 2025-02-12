@@ -26,10 +26,12 @@ import { formSchema } from "@/lib/auth-schema";
 import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignUpPage() {
   const { push } = useRouter();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,6 +57,7 @@ export default function SignUpPage() {
           toast({
             title: "Please wait...",
           });
+          setIsSubmitting(true);
         },
         onSuccess: () => {
           form.reset();
@@ -84,6 +87,7 @@ export default function SignUpPage() {
             type: "manual",
             message: errorMessage,
           });
+          setIsSubmitting(false);
         },
       }
     );
@@ -140,7 +144,7 @@ export default function SignUpPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               Submit
             </Button>
           </form>
