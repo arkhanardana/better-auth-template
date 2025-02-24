@@ -25,12 +25,12 @@ import Link from "next/link";
 import { signInSchema } from "@/lib/auth-schema";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "@/app/hooks/use-toast";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
-  const { push } = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -58,7 +58,8 @@ export default function SignInPage() {
           toast({
             title: "Sign in success",
           });
-          push("/dashboard");
+          router.push("/dashboard");
+          router.refresh();
         },
         onError: () => {
           toast({

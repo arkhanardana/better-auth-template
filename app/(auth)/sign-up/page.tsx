@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function SignUpPage() {
-  const { push } = useRouter();
+  const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,7 +64,7 @@ export default function SignUpPage() {
           toast({
             title: "Sign up success",
           });
-          push("/sign-in");
+          router.push("/sign-in");
         },
         onError: ({ error }) => {
           let errorMessage = error.message;
